@@ -30,7 +30,7 @@ void setup() {
 
 
   // komunikace přes sériovou linku rychlostí 9600 baud
-  Serial.begin(9600);
+  Serial.begin(2000000);
   // zapnutí komunikace nRF modulu
   nRF.begin();
   // nastavení výkonu nRF modulu,
@@ -39,9 +39,10 @@ void setup() {
   nRF.setPALevel(RF24_PA_LOW);
   // nastavení zapisovacího a čtecího kanálu
   nRF.openWritingPipe(adresaVysilac);
-  nRF.openReadingPipe(1,adresaPrijimac);
+  //nRF.openReadingPipe(1,adresaPrijimac);
   // začátek příjmu dat
-  nRF.startListening();
+  //nRF.startListening();
+  nRF.stopListening();
 }
 
 void loop() {
@@ -52,7 +53,7 @@ void loop() {
   aktX = analogRead(pinX) - nulaX;
   aktY = analogRead(pinY) - nulaY;
   // načtení stavu tlačítka
-  stavTlac = digitalRead(pinKey);
+  //stavTlac = digitalRead(pinKey);
   if (aktX > 0) {
     aktX = map(aktX, 0, 1023-nulaX, 0, 100);
   }
@@ -65,21 +66,12 @@ void loop() {
   else {
     aktY = map(aktY, 0, -nulaY, 0, -100);
   }
-  int sum = aktX + aktY;
-  char * arr = "ahoj\0";
 
+  char s[8]; 
 
-  char s[2]; 
-
-  s[0] = (char)aktX;
-  s[1] = (char)aktY;
-  
-  // for smyčka pro postupné odeslání
-  // hodnot 0 až 3 pro načtení všech dat
-  // z přijímače
-  for (int i=0; i < 4; i++ ) {
-    // ukončení příjmu dat
-    nRF.stopListening();
+  s[0] = aktX;
+  s[1] = aktY;
+ 
     // vytisknutí aktuální volby po sériové lince
     Serial.print("Posilam volbu ");
     Serial.print((int)s[0]);
@@ -90,10 +82,8 @@ void loop() {
     unsigned long casZacatek = micros();
     // odeslání aktuální volby, v případě selhání
     // vytištění chybové hlášky na sériovou linku
-    if (!nRF.write( s, sizeof(char) * 2 )){
+    if (!nRF.write( s, sizeof(char) * 8 )){
        Serial.println("Chyba při odeslání!");
     }
-    
-    delay(5);
-  }
+
 }

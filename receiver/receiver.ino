@@ -15,7 +15,7 @@ byte adresaVysilac[]= "vysilac00";
 
 void setup() {
   // komunikace přes sériovou linku rychlostí 9600 baud
-  Serial.begin(9600);
+  Serial.begin(2000000);
   // zapnutí komunikace nRF modulu
   nRF.begin();
   // nastavení výkonu nRF modulu,
@@ -29,11 +29,24 @@ void setup() {
   nRF.startListening();
 }
 
+unsigned long lastTime = 0;
+unsigned long count = 0;
+unsigned long period = 0;
+char prijem[8];
+unsigned long odezva;
+
 void loop() {
   // proměnné pro příjem a odezvu
-  char prijem[2];
-  unsigned long odezva;
+  
 
+  if (millis() - lastTime >= 1000)
+  {
+    //Serial.println("ASDASDASD");
+    lastTime = millis();
+    period = count;
+    count = 0;
+  }
+  
   // v případě, že nRF je připojené a detekuje
   // příchozí data, začni s příjmem dat
   if( nRF.available()){
@@ -41,15 +54,32 @@ void loop() {
     while (nRF.available()) {
       // v případě příjmu dat se provede zápis
       // do proměnné prijem
-      nRF.read( &prijem, sizeof(char) * 2 );
+      nRF.read( &prijem, sizeof(char) * 8 );
+      count++;
     }
     // vytisknutí přijatých dat na sériovou linku
     Serial.print("Prijata volba: ");
     Serial.print((int)prijem[0]);
     Serial.print(",");
     Serial.print((int)prijem[1]);
+    Serial.print(",");
+    Serial.print((int)prijem[2]);
+    Serial.print(",");
+    Serial.print((int)prijem[3]);
+    Serial.print(",");
+    Serial.print((int)prijem[4]);
+    Serial.print(",");
+    Serial.print((int)prijem[5]);
+    Serial.print(",");
+    Serial.print((int)prijem[6]);
+    Serial.print(",");
+    Serial.print((int)prijem[7]);
+    Serial.print(",  Frequency: ");
+
+    Serial.print(period);
     Serial.println();
-  
-    nRF.write( &odezva, sizeof(odezva) );     
+
+   // nRF.write( &odezva, sizeof(odezva) );     
+    
   }
 }

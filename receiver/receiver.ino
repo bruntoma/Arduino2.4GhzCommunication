@@ -31,7 +31,7 @@ void setup() {
 
 void loop() {
   // proměnné pro příjem a odezvu
-  char prijem[5];
+  char prijem[2];
   unsigned long odezva;
 
   // v případě, že nRF je připojené a detekuje
@@ -41,44 +41,15 @@ void loop() {
     while (nRF.available()) {
       // v případě příjmu dat se provede zápis
       // do proměnné prijem
-      nRF.read( &prijem, sizeof(char) * 5 );
+      nRF.read( &prijem, sizeof(char) * 2 );
     }
     // vytisknutí přijatých dat na sériovou linku
     Serial.print("Prijata volba: ");
-    Serial.print(prijem);
-  /*  // dekódování přijatých dat
-    switch( prijem ) {
-      // pro známou hodnotu dat (1,2,3)
-      // se odešle odezva:
-      case 1:
-        // v případě 1 odešli počet milisekund
-        // od připojení napájení
-        odezva = millis();
-        break;
-      case 2:
-        // v případě 2 počet sekund
-        // od připojení napájení
-        odezva = millis()/1000;
-        break;
-      case 3:
-        // v případě 3 počet mikrosekund
-        // od připojení napájení
-        odezva = micros();
-        break;
-      // v případě ostatních dat bude odezva 0
-      default:
-        odezva = 0;
-        break;
-    }*/
-    odezva = 1;
-    // ukončení příjmu dat
-    nRF.stopListening();
-    // odeslání odezvy 
+    Serial.print((int)prijem[0]);
+    Serial.print(",");
+    Serial.print((int)prijem[1]);
+    Serial.println();
+  
     nRF.write( &odezva, sizeof(odezva) );     
-    // přepnutí do příjmu dat pro další komunikaci
-    nRF.startListening();
-    // vytištění odezvy po sériové lince     
-    Serial.print(", odezva: ");
-    Serial.println(odezva);  
   }
 }

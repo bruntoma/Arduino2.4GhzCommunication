@@ -67,6 +67,13 @@ void loop() {
   }
   int sum = aktX + aktY;
   char * arr = "ahoj\0";
+
+
+  char s[2]; 
+
+  s[0] = (char)aktX;
+  s[1] = (char)aktY;
+  
   // for smyčka pro postupné odeslání
   // hodnot 0 až 3 pro načtení všech dat
   // z přijímače
@@ -75,55 +82,18 @@ void loop() {
     nRF.stopListening();
     // vytisknutí aktuální volby po sériové lince
     Serial.print("Posilam volbu ");
-    Serial.println(arr);
+    Serial.print((int)s[0]);
+    Serial.print(", ");
+    Serial.print((int)s[1]);
+    Serial.println();
     // uložení startovního času komunikace
     unsigned long casZacatek = micros();
     // odeslání aktuální volby, v případě selhání
     // vytištění chybové hlášky na sériovou linku
-    if (!nRF.write( arr, sizeof(char) * 5 )){
+    if (!nRF.write( s, sizeof(char) * 2 )){
        Serial.println("Chyba při odeslání!");
     }
-    // přepnutí do příjmu dat pro další komunikaci
-    nRF.startListening();
-    // uložení času začátku čekání
-    unsigned long casCekaniOdezvy = micros();
-    // proměnná s uložením stavu čekání na odezvu
-    // od přijímače - "timeout"
-    boolean timeout = false;
-    // čekací while smyčka na odezvu od přijímače
-    while ( ! nRF.available() ){
-      // pokud do 200 000 mikrosekund nepřijde odezva,
-      // ukonči čekání a nastav timeout
-      if (micros() - casCekaniOdezvy > 200000 ){
-          timeout = true;
-          break;
-      }      
-    }
-    // kontrola stavu timeoutu
-    if ( timeout ){
-      // v případě vypršení čekací smyčky,
-      // vytiskni informaci o chybě spojení
-      Serial.println("Chyba při prijmu, vyprseni casu na odezvu!");
-    }
-    // v opačném případě ulož přijatou zprávu a vypiš ji po sériové lince
-    else{
-        // proměnná pro uložení přijatých dat
-        unsigned long prijataData;
-        // příjem dat se zápisem do proměnné prijataData
-        nRF.read( &prijataData, sizeof(prijataData) );
-        // uložení času konce komunikace
-        unsigned long casKonec = micros();
-        // výpis dat z komunikace po sériové lince
-        // včetně délky trvání spojení
-        Serial.print("Odeslana volba: ");
-        Serial.print(i);
-        Serial.print(", prijata data: ");
-        Serial.println(prijataData);
-        Serial.print("Delka spojeni: ");
-        Serial.print(casKonec - casZacatek);
-        Serial.println(" mikrosekund.");
-    }
-    // pauza 1 sekunda
-    delay(1000);
+    
+    delay(5);
   }
 }

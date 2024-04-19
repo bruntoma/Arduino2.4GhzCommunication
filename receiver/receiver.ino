@@ -1,6 +1,7 @@
 // nRF24L01 přijímač
 
 // připojení knihoven
+#include <Servo.h>
 #include <SPI.h>
 #include "RF24.h"
 // nastavení propojovacích pinů
@@ -8,12 +9,16 @@
 #define CS 8
 // inicializace nRF s piny CE a CS
 RF24 nRF(CE, CS);
+Servo myservo;
+
+int servoPos = 1500;
 // nastavení adres pro přijímač a vysílač,
 // musí být nastaveny stejně v obou programech!
 byte adresaPrijimac[]= "prijimac00";
 byte adresaVysilac[]= "vysilac00";
 
 void setup() {
+  myservo.attach(2);
   // komunikace přes sériovou linku rychlostí 9600 baud
   Serial.begin(2000000);
   // zapnutí komunikace nRF modulu
@@ -37,7 +42,6 @@ unsigned long odezva;
 
 void loop() {
   // proměnné pro příjem a odezvu
-  
 
   if (millis() - lastTime >= 1000)
   {
@@ -55,7 +59,15 @@ void loop() {
       // v případě příjmu dat se provede zápis
       // do proměnné prijem
       nRF.read( &prijem, sizeof(char) * 8 );
+      servoPos = 100.0/prijem[0];
       count++;
+      Serial.println(servoPos);
+      if (servoPos > 0)
+        myservo.write(2000);
+      else if (servoPos < 0)
+        myservo.write(1000);
+      else
+        myservo.writeMicroseconds(1500);
     }
     // vytisknutí přijatých dat na sériovou linku
     Serial.print("Prijata volba: ");
@@ -64,21 +76,14 @@ void loop() {
     Serial.print((int)prijem[1]);
     Serial.print(",");
     Serial.print((int)prijem[2]);
-    Serial.print(",");
-    Serial.print((int)prijem[3]);
-    Serial.print(",");
-    Serial.print((int)prijem[4]);
-    Serial.print(",");
-    Serial.print((int)prijem[5]);
-    Serial.print(",");
-    Serial.print((int)prijem[6]);
-    Serial.print(",");
-    Serial.print((int)prijem[7]);
+
     Serial.print(",  Frequency: ");
 
     Serial.print(period);
     Serial.println();
 
+   
+    delay(50);
    // nRF.write( &odezva, sizeof(odezva) );     
     
   }
